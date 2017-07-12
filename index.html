@@ -20,6 +20,11 @@
       text-align: center;
     }
 
+    .clean {
+      text-align: center;
+      font-size: 11px;
+    }
+
     form {
       padding: 0 0 20px;
     }
@@ -80,6 +85,8 @@
 <body>
   <div class="container">
     <h1>TodoList</h1>
+    <p class="clean"><a href="#" id="clean-up">Remove done</a></p>
+
 
     <form>
       <input type="text" id="new-todo" placeholder="What needs to be done?">
@@ -87,7 +94,7 @@
 
     <ul id="todolist">
       <li class="todo">
-        <input id="todo-1" type="checkbox">
+        <input id="todo-1" type="checkbox" >
         <label for="todo-1">Sweep the floor</label>
       </li>
       <li class="todo completed">
@@ -96,14 +103,87 @@
       </li>
     </ul>
     <div class="footer">
-      Todo: <span id="todo-count">1</span> •
+      Todo: <span id="todo-count">0</span> •
       Done: <span id="completed-count">0</span> •
-      Total: <span id="total-count">1</span>
+      Total: <span id="total-count">0</span>
     </div>
   </div>
 
   <script>
-  	// JavaScript here...
+
+    function updateCounters() {
+      var todoCount = $(".todo").length;
+      var completedCount = $(".completed").length;
+
+      $("#total-count").html(todoCount);
+      $("#completed-count").html(completedCount);
+      $("#todo-count").html(todoCount - completedCount);
+      }
+
+    function toggleDone() {
+      var checkbox = this;
+      $(checkbox).parent().toggleClass("completed");
+      updateCounters();
+    }
+
+    function submitTodo(event) {
+      // stop the form from doing the default action, submitting...
+      event.preventDefault();
+
+      var title = $("#new-todo").val();
+
+      createTodo(title);
+
+      $("#new-todo").val(null);
+      updateCounters();
+    }
+
+    function createTodo(title) {
+      var checkboxId = "todo-" + nextTodoId();
+
+      var listItem = $("<li></li>");
+      listItem.addClass("todo");
+
+      var checkbox = $('<input>');
+      checkbox.attr('type', 'checkbox');
+      checkbox.attr('id', checkboxId);
+      checkbox.val(1);
+      checkbox.bind('change', toggleDone);
+
+      var space = document.createTextNode(" ");
+
+      var label = $('<label></label>');
+      label.attr('for', checkboxId);
+      label.html(title);
+
+      listItem.append(checkbox);
+      listItem.append(space);
+      listItem.append(label);
+
+      $("#todolist").append( listItem );
+
+      updateCounters();
+    }
+
+    function nextTodoId() {
+      return $(".todo").length + 1;
+    }
+
+    function cleanUpDoneTodos(event) {
+      event.preventDefault();
+      $.when($(".completed").remove())
+        .then(updateCounters);
+    }
+
+    $("#clean-up").bind('click', cleanUpDoneTodos);
+
+    $("form").bind('submit', submitTodo);
+
+    $(document).ready(function() {
+      $("input[type=checkbox]").bind('change', toggleDone);
+      updateCounters();
+    });
+
   </script>
 </body>
 </html>
